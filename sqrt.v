@@ -25,7 +25,7 @@ module sqrt(
         
 always @(posedge clk_i)
     if (rst_i) begin
-       state <= 0;
+       state <= IDLE;
        m <= 1 << START;
        y <= 0;
        y_bo <= 0;

@@ -32,7 +32,6 @@ module mul(
             ctr <= 0;
             part_res <= 0;
             y_bo <= 0;
-            
             state <= IDLE;
         end else begin
         
