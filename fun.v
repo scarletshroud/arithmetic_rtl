@@ -10,7 +10,7 @@ module fun(
     output reg [7:0] y_bo
 );
     
-    localparam IDLE = 2'b00;
+    localparam IDLE = 2'bs0;
     localparam CUB_SQRT = 2'b01;
     localparam SQRT = 2'b10;
    
@@ -39,7 +39,7 @@ module fun(
         .y_bo(sqrt_bo)
     );
     
-    assign busy_o = state == IDLE? 0 : 1;
+    assign busy_o;
     assign plus_bo = a_bi + cub_sqrt_bo;
     
 always @(posedge clk_i)
