@@ -20,23 +20,34 @@ module sqrt_tb;
     );
     
     integer i;
-    reg [7:0] test_val;
+    reg [7:0] expected_val;
     
     always #10 clk = ~clk;
         
     initial begin
         clk = 1'b1;
+        
+        for (i = 0; i <= 10; i = i + 1) begin
+            rst = 1'b1;
+                        
+            #10
+            
+            x_in = i * i;
+            expected_val = i;
+            
+            rst = 1'b0;
+            
+            #200
+        
+            if (expected_val == y) begin
+                $display("Okay: expected: %d, actual: %d", expected_val, y);
+            end else begin
+                $display("Error: expected: %d, actual: %d", expected_val, y);
+            end
+        end
+        
         rst = 1'b1;
-        x_in = 0;
-        
-        #10
-        
-        x_in = 8'd9;
-        rst = 1'b0;
-        
-        #130
-        
-        $display("Result %d", y); 
+        #100 $stop;
     end
     
 endmodule

@@ -6,7 +6,7 @@ module mul_tb;
     reg clk;
     reg rst;
     wire start;
-    wire [7:0] y;
+    wire [15:0] y;
     wire b_o;
    
     assign start = ~rst;
@@ -23,13 +23,33 @@ module mul_tb;
     
     always #10 clk = ~clk; 
     
+    integer i;
+    reg[15:0] expected_val;
+    
     initial begin
         clk = 1'b1;
-        rst = 1'b1; 
-        a_in = 3;
-        b_in = 5;
+        for (i = 0; i < 10; i = i + 1) begin
+            rst = 1'b1;
+            
+            #10
+            
+            expected_val = i * i;
+             
+            a_in = i;
+            b_in = i;
+            
+            rst = 1'b0;
+            
+            #200
+            if ( expected_val == y) begin
+                $display("Okay: expected: %d, actual: %d", expected_val, y);
+            end else begin
+                $display("Error: expected: %d, actual: %d", expected_val, y);
+            end
+        end
         
-        $display("Result %d", y); 
+        rst = 1'b1;
+        #100 $stop;
     end
     
 endmodule

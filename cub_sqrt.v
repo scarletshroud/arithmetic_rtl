@@ -31,7 +31,6 @@ always @(posedge clk_i)
        y <= 0;
        y_bo <= 0;
     end else begin
-    
         case(state)
             IDLE:
                 if (start_i) begin

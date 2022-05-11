@@ -16,11 +16,11 @@ module mul(
     
     reg [2:0] ctr;
     wire [2:0] end_step;
-    wire [7:0] part_sum;
+    wire [2:0] part_sum;
     wire [15:0] shifted_part_sum;
     reg [7:0] a, b;
     reg [15:0] part_res;
-    reg state;
+    reg state = IDLE;
     
     assign part_sum = a & {8{b[ctr]}};
     assign shifted_part_sum = part_sum << ctr;
@@ -55,7 +55,6 @@ module mul(
                         ctr <= ctr + 1;
                     end
             endcase 
-            
         end
         
 endmodule
