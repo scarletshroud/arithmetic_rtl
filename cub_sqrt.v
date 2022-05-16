@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module cub_sqrt(
+module cube (
     input clk_i,
     input rst_i,
     input [7:0] x_bi,
@@ -9,8 +9,12 @@ module cub_sqrt(
     output reg [7:0] y_bo 
 );
 
-    localparam IDLE = 1'b0;
-    localparam WORK = 1'b1;
+    localparam IDLE = 3'b000;
+    localparam STATE1 = 3'b001;
+    localparam STATE2 = 3'b010;
+    localparam STATE3 = 3'b011;
+    localparam STATE4 = 3'b100;
+    
     localparam START = 6'sd6;
     localparam END = -(6'sd3);
     
@@ -19,42 +23,100 @@ module cub_sqrt(
     reg [5:0] s;
     reg [7:0] y;
     wire [5:0] end_step;
-    reg state = IDLE;
+    
+    reg [2:0] state = IDLE;
+    reg [2:0] state_next;
     
     assign end_step = (s == END);
-    assign busy_o = state;
+    assign busy_o = (state != 0);
+    
+    reg mul_rst;
+    reg [7:0] mul_a; 
+    reg [7:0] mul_b;
+    wire [15:0] mul_out;
+    wire mul_start;
+    wire mul_busy;
+    
+    assign mul_start = ~mul_rst;
+    
+    mul mul_t (
+        .clk_i(clk_i),
+        .rst_i(mul_rst),
+        .a_bi(mul_a), 
+        .b_bi(mul_b),
+        .start_i(mul_start),
+        .busy_o(mul_busy),
+        .y_bo(mul_out)
+    );
         
 always @(posedge clk_i)
     if (rst_i) begin
-       state <= IDLE;
+        state <= STATE1;
+    end else begin
+        state <= state_next;
+    end
+    
+always @* begin
+    case(state) 
+        IDLE: state_next = IDLE;
+        STATE1: state_next = (end_step) ? IDLE : STATE2;
+        STATE2: state_next = mul_busy ? STATE2 : STATE3;
+        STATE3: state_next = mul_busy ? STATE3 : STATE4;
+        STATE4: state_next = STATE1;
+    endcase
+end  
+     
+always @(posedge clk_i)
+    if (rst_i) begin
        s <= START;
        y <= 0;
        y_bo <= 0;
+       mul_rst <= 1'b1;
+       x <= x_bi;
     end else begin
         case(state)
-            IDLE:
-                if (start_i) begin
-                    state <= WORK;
-                    s <= START;
-                    x <= x_bi;
-                    y_bo <= 0;
-                    b <= 1 << s;
-                end
-            WORK:
+            IDLE: 
                 begin
-                    if (end_step) begin
-                        state <= IDLE;
-                        y_bo <= y;
+                    y_bo <= y;
+                end
+                
+            STATE1:
+                begin
+                    if (!end_step) begin
+                        b <= 1 << s;
+                        y = y << 1;
                     end
-                    
-                    y = y << 1;
-                    b = (3*y*(y+1)+1) << s;
+                end
+                
+            STATE2:
+                begin
+                    if (!mul_busy) begin
+                        mul_rst <= 1'b1;
+                        mul_a <= 3;
+                        mul_b <= y;
+                        mul_rst <= 1'b0;
+                    end
+                end
+            
+            STATE3:
+                begin
+                    if (!mul_busy) begin
+                        mul_rst <= 1'b1;
+                        mul_a <= mul_out;
+                        mul_b <= y + 1;
+                        mul_rst <= 1'b0;
+                    end
+                end
+                
+            STATE4:
+                begin
+                    b = (mul_out + 1)<< s;
                     
                     if (x >= b) begin
-                        x = x - b;
-                        y = y + 1;
+                            x = x - b;
+                            y = y + 1;
                     end
-                    
+                        
                     s = s - 3;
                 end
         endcase 
