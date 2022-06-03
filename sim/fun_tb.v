@@ -36,20 +36,18 @@ module fun_tb();
                 rst = 1'b1;
                 a_in = i;
                 b_in = j * j * j;
-                expected_val = 5;
-                
+             
                 #10
                 
+                expected_val = $floor($sqrt(i + j));
                 rst = 1'b0;
                 #1590
-                
-                $display("actual: %d, a: %d, b: %d", y, a_in, b_in);
-                
-                /*if (expected_val == y) begin
+                 
+                if (expected_val == y) begin
                     $display("Okay: expected: %d, actual: %d, a: %d, b: %d", expected_val, y, a_in, b_in);
                 end else begin
                     $display("Error: expected: %d, actual: %d, a: %d, b: %d", expected_val, y, a_in, b_in);
-                end */
+                end
            end
         end
         
