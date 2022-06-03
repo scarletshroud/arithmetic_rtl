@@ -28,20 +28,19 @@ module cube (
     reg [2:0] state_next;
     
     assign end_step = (s == END);
-    assign busy_o = (state != 0);
+    assign busy_o = (state != IDLE);
     
-    reg mul_rst;
     reg [7:0] mul_a; 
     reg [7:0] mul_b;
     wire [15:0] mul_out;
     wire mul_start;
     wire mul_busy;
     
-    assign mul_start = ~mul_rst;
+    assign mul_start = (state == STATE1 || state == STATE2);
     
     mul mul_t (
         .clk_i(clk_i),
-        .rst_i(mul_rst),
+        .rst_i(rst_i),
         .a_bi(mul_a), 
         .b_bi(mul_b),
         .start_i(mul_start),
@@ -51,73 +50,75 @@ module cube (
         
 always @(posedge clk_i)
     if (rst_i) begin
-        state <= STATE1;
+        state <= IDLE;
     end else begin
         state <= state_next;
     end
     
 always @* begin
     case(state) 
-        IDLE: state_next = IDLE;
+        IDLE: state_next = (start_i) ? STATE1 : IDLE;
         STATE1: state_next = (end_step) ? IDLE : STATE2;
         STATE2: state_next = mul_busy ? STATE2 : STATE3;
         STATE3: state_next = mul_busy ? STATE3 : STATE4;
         STATE4: state_next = STATE1;
     endcase
 end  
-     
+        
 always @(posedge clk_i)
     if (rst_i) begin
        s <= START;
        y <= 0;
        y_bo <= 0;
-       mul_rst <= 1'b1;
        x <= x_bi;
     end else begin
         case(state)
             IDLE: 
                 begin
-                    y_bo <= y;
+                    if (start_i) begin
+                        x <= x_bi;
+                        mul_a <= 3;
+                        mul_b <= y;
+                    end
                 end
                 
             STATE1:
                 begin
                     if (!end_step) begin
                         b <= 1 << s;
-                        y = y << 1;
+                        y <= y << 1;
+                    end else begin
+                        y_bo <= y;
                     end
                 end
                 
             STATE2:
                 begin
                     if (!mul_busy) begin
-                        mul_rst <= 1'b1;
-                        mul_a <= 3;
-                        mul_b <= y;
-                        mul_rst <= 1'b0;
+                        mul_a <= mul_out;
+                        mul_b <= y + 1;
                     end
                 end
             
             STATE3:
                 begin
                     if (!mul_busy) begin
-                        mul_rst <= 1'b1;
-                        mul_a <= mul_out;
-                        mul_b <= y + 1;
-                        mul_rst <= 1'b0;
+                        
+                        b <= (mul_out + 1) << s;
+                    
+                        if (x >= b) begin
+                            x <= x - b;
+                            y <= y + 1;
+                        end
+                            
+                        s <= s - 3;
                     end
                 end
                 
             STATE4:
                 begin
-                    b = (mul_out + 1)<< s;
-                    
-                    if (x >= b) begin
-                            x = x - b;
-                            y = y + 1;
-                    end
-                        
-                    s = s - 3;
+                    mul_a <= 3;
+                    mul_b <= y;
                 end
         endcase 
     end

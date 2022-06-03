@@ -29,20 +29,20 @@ module mul_tb;
     initial begin     
         clk = 1'b1;
         
-        for (i = 5; i < 10; i = i + 1) begin
+        for (i = 0; i < 16; i = i + 1) begin
         
             rst = 1'b1;
+            
+            a_in = i;
+            b_in = i;
             
             #10
             
             expected_val = i * i;
-             
-            a_in = i;
-            b_in = i;
-            
+                       
             rst = 1'b0;
             
-            #700
+            #500
             
             if ( expected_val == y) begin
                 $display("Okay: expected: %d, actual: %d", expected_val, y);

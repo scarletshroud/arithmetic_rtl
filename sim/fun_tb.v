@@ -31,25 +31,27 @@ module fun_tb();
     initial begin
         clk = 1'b1;
         
-        //for (i = 0; i < 16; i = i + 1) begin
-            //for (j = 0; j < 16; j = j + 1) begin
+        for (i = 0; i <= 16; i = i + 1) begin
+          for (j = 0; j < 5; j = j + 1) begin
                 rst = 1'b1;
+                a_in = i;
+                b_in = j * j * j;
+                expected_val = 5;
+                
                 #10
                 
-                a_in = 23;
-                b_in = 8;
-                expected_val = 2;
-                
                 rst = 1'b0;
-                #200
+                #1590
                 
-                if (expected_val == y) begin
-                    $display("Okay: expected: %d, actual: %d", expected_val, y);
+                $display("actual: %d, a: %d, b: %d", y, a_in, b_in);
+                
+                /*if (expected_val == y) begin
+                    $display("Okay: expected: %d, actual: %d, a: %d, b: %d", expected_val, y, a_in, b_in);
                 end else begin
-                    $display("Error: expected: %d, actual: %d", expected_val, y);
-                end
-          //  end
-        //end
+                    $display("Error: expected: %d, actual: %d, a: %d, b: %d", expected_val, y, a_in, b_in);
+                end */
+           end
+        end
         
         rst = 1'b1;
         #100 $stop;

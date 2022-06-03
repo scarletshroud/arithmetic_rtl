@@ -27,17 +27,17 @@ module sqrt_tb;
     initial begin
         clk = 1'b1;
         
-        for (i = 0; i <= 10; i = i + 1) begin
+        for (i = 0; i <= 15; i = i + 1) begin
             rst = 1'b1;
-                        
-            #10
+            x_in = i * i;            
+
+            #20
             
-            x_in = i * i;
             expected_val = i;
             
             rst = 1'b0;
             
-            #200
+            #300
         
             if (expected_val == y) begin
                 $display("Okay: expected: %d, actual: %d", expected_val, y);

@@ -6,7 +6,6 @@ module mul(
     input [7:0] a_bi,
     input [7:0] b_bi,
     input start_i, 
-    
     output busy_o,
     output reg [15:0] y_bo 
 );
@@ -25,7 +24,7 @@ module mul(
     
     assign part_sum = a & {8{b[ctr]}};
     assign shifted_part_sum = part_sum << ctr;
-    assign end_step = (ctr == 4'h15);
+    assign end_step = (ctr == 3'd7); //to do fix
     assign busy_o = state;
     
     always @(posedge clk_i)
