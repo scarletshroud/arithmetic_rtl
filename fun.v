@@ -73,26 +73,21 @@ end
     
 always @(posedge clk_i)
         if (rst_i) begin
-            b <= b_bi;
             y_bo <= 0;
         end else begin
             case (state)
                 IDLE:
                     begin
                         if (start_i) begin
-                            
+                            b <= b_bi;
                         end
                     end
                 SQRT_WORK:
                     begin
-                        y_bo <= sqrt_bo;
-                    end   
-                CUBE_WORK:
-                    begin
-                        if (!cube_busy) begin
-                            
+                        if (!sqrt_busy) begin
+                            y_bo <= sqrt_bo;
                         end
-                    end
+                    end   
             endcase
         end
 endmodule
