@@ -33,10 +33,8 @@ module cube (
     reg [7:0] mul_a; 
     reg [7:0] mul_b;
     wire [15:0] mul_out;
-    wire mul_start;
+    reg mul_start;
     wire mul_busy;
-    
-    assign mul_start = (state == STATE1 || state == STATE2);
     
     mul mul_t (
         .clk_i(clk_i),
@@ -71,6 +69,7 @@ always @(posedge clk_i)
        y <= 0;
        y_bo <= 0;
        x <= x_bi;
+       mul_start <= 1'b0;
     end else begin
         case(state)
             IDLE: 
@@ -79,12 +78,15 @@ always @(posedge clk_i)
                         x <= x_bi;
                         mul_a <= 3;
                         mul_b <= y;
+                        s <= START;
+                        y <= 0;
                     end
                 end
                 
             STATE1:
                 begin
                     if (!end_step) begin
+                        mul_start <= 1'b1;
                         b <= 1 << s;
                         y <= y << 1;
                     end else begin
@@ -94,14 +96,19 @@ always @(posedge clk_i)
                 
             STATE2:
                 begin
+                    
                     if (!mul_busy) begin
                         mul_a <= mul_out;
                         mul_b <= y + 1;
+                        mul_start <= 1'b1;
+                    end else begin
+                        mul_start <= 1'b0;
                     end
                 end
             
             STATE3:
                 begin
+                    mul_start <= 1'b0;
                     if (!mul_busy) begin
                         
                         b <= (mul_out + 1) << s;

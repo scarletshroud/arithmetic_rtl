@@ -24,7 +24,7 @@ module fun(
     wire [7:0] sqrt_bo;
     wire busy;
    
-    wire cube_start;
+    reg cube_start;
     wire cube_busy;
     wire [7:0] cube_bo;
       
@@ -37,7 +37,7 @@ module fun(
         .y_bo(cube_bo)
     );
     
-    wire sqrt_start;
+    reg sqrt_start;
     wire sqrt_busy;
     
     sqrt sqrt_t(
@@ -50,8 +50,6 @@ module fun(
     );
     
     assign busy_o = (state != IDLE);
-    assign sqrt_start = (state == SQRT_ON);
-    assign cube_start = (state == CUBE_ON);
     assign plus_bo = a_bi + cube_bo;
     
 always @(posedge clk_i)
@@ -74,20 +72,31 @@ end
 always @(posedge clk_i)
         if (rst_i) begin
             y_bo <= 0;
+            cube_start <= 1'b0;
+            sqrt_start <= 1'b0;
         end else begin
             case (state)
                 IDLE:
                     begin
                         if (start_i) begin
                             b <= b_bi;
+                            cube_start <= 1'b1;
                         end
                     end
                 SQRT_WORK:
                     begin
+                        sqrt_start <= 1'b0;
                         if (!sqrt_busy) begin
                             y_bo <= sqrt_bo;
                         end
                     end   
+                CUBE_WORK:
+                    begin
+                        cube_start <= 1'b0;
+                        if (!cube_busy) begin
+                            sqrt_start <= 1'b1;
+                        end
+                    end
             endcase
         end
 endmodule

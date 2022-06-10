@@ -55,6 +55,7 @@ module sqrt(
                     if (start_i) begin
                         m <= 1 << START;
                         x <= x_bi;
+                        y <= 0;
                     end
                 WORK:
                     begin

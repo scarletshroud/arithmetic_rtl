@@ -5,11 +5,9 @@ module fun_tb();
     reg rst;
     reg [7:0] a_in;
     reg [7:0] b_in;
-    wire start;
+    reg start;
     wire [7:0] y;
     wire b_o;
-    
-    assign start = ~rst;
     
     fun fun_t (
         .clk_i(clk),
@@ -30,17 +28,25 @@ module fun_tb();
  
     initial begin
         clk = 1'b1;
+        rst = 1'b1;
         
-        for (i = 0; i <= 16; i = i + 1) begin
+        #10
+        
+        rst = 1'b0;
+        
+        for (i = 0; i < 16; i = i + 1) begin
           for (j = 0; j < 5; j = j + 1) begin
-                rst = 1'b1;
-                a_in = i;
+                
+                start = 1'b1;
                 b_in = j * j * j;
-             
-                #10
+                a_in = i; 
+                
+                #20
+                
+                start = 1'b0;
                 
                 expected_val = $floor($sqrt(i + j));
-                rst = 1'b0;
+                
                 #1590
                  
                 if (expected_val == y) begin

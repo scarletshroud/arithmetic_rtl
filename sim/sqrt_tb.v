@@ -4,11 +4,9 @@ module sqrt_tb;
     reg clk;
     reg rst;
     reg [7:0] x_in;
-    wire start;
+    reg start;
     wire [7:0] y;
     wire b_o;
-    
-    assign start = ~rst;
     
     sqrt sqrt_t (
         .clk_i(clk),
@@ -26,18 +24,27 @@ module sqrt_tb;
         
     initial begin
         clk = 1'b1;
+        rst = 1'b1;
+        
+        #10
+        
+        rst = 1'b0;
         
         for (i = 0; i <= 15; i = i + 1) begin
-            rst = 1'b1;
+        
+            start = 1'b1; 
+            
+            #10
+            
             x_in = i * i;            
 
-            #20
-            
+            #10
+                      
+            start = 1'b0;
             expected_val = i;
             
-            rst = 1'b0;
-            
-            #300
+        
+            #280
         
             if (expected_val == y) begin
                 $display("Okay: expected: %d, actual: %d", expected_val, y);

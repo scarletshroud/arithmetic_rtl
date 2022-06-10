@@ -6,10 +6,8 @@ module cube_tb();
     reg rst;
     reg [7:0] x;
     wire busy;
-    wire start;
+    reg start;
     wire [7:0] y;
-    
-    assign start = ~rst;
     
     cube cube_rt( 
         .clk_i( clk ),
@@ -27,18 +25,27 @@ module cube_tb();
     
     initial begin
         clk = 1'b1;
+        rst = 1'b1;
+        
+        #10
+       
+        rst = 1'b0;
         
         for ( i = 0; i < 5; i = i + 1 ) begin
-            rst = 1'b1;
+        
+            start = 1'b1; 
+            
+            #10
+            
             x = i * i * i;
             
             #20
             
+            start = 1'b0;
+            
             expected_val = i;
-            
-            rst = 1'b0;
-            
-            #1300
+                      
+            #770
             
             if ( expected_val == y ) begin
                 $display( "CORRECT: actual: %d, expected: %d", y, expected_val );

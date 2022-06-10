@@ -5,12 +5,10 @@ module mul_tb;
     reg [7:0] b_in;
     reg clk;
     reg rst;
-    wire start;
+    reg start;
     wire [15:0] y;
     wire b_o;
-   
-    assign start = ~rst;
-   
+     
     mul m(
         .clk_i(clk),
         .rst_i(rst),
@@ -29,19 +27,28 @@ module mul_tb;
     initial begin     
         clk = 1'b1;
         
-        for (i = 0; i < 16; i = i + 1) begin
+        rst = 1'b1;
         
-            rst = 1'b1;
+        #10
+        
+        rst = 1'b0;
+                 
+
+        for (i = 0; i < 16; i = i + 1) begin
+            
+            start = 1'b1; 
+            
+            #10
             
             a_in = i;
             b_in = i;
             
             #10
             
-            expected_val = i * i;
-                       
-            rst = 1'b0;
+            start = 1'b0;
             
+            expected_val = i * i;
+                               
             #500
             
             if ( expected_val == y) begin
